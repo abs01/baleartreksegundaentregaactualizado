@@ -568,6 +568,11 @@ class ComposerStaticInit608280154293eae52c32f6e1ca3f5a80
     );
 
     public static $classMap = array (
+        'App\\Docs\\ApiDocs' => __DIR__ . '/../..' . '/app/Docs/ApiDocs.php',
+        'App\\Docs\\Schemas\\CommentSchema' => __DIR__ . '/../..' . '/app/Docs/Schemas/CommentSchema.php',
+        'App\\Docs\\Schemas\\MeetingSchema' => __DIR__ . '/../..' . '/app/Docs/Schemas/MeetingSchema.php',
+        'App\\Docs\\Schemas\\TrekSchema' => __DIR__ . '/../..' . '/app/Docs/Schemas/TrekSchema.php',
+        'App\\Docs\\Schemas\\UserSchema' => __DIR__ . '/../..' . '/app/Docs/Schemas/UserSchema.php',
         'App\\Http\\Controllers\\Api\\TrekController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/TrekController.php',
         'App\\Http\\Controllers\\Api\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/UserController.php',
         'App\\Http\\Controllers\\Auth\\AuthenticatedSessionController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/AuthenticatedSessionController.php',

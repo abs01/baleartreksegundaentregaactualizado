@@ -2,72 +2,49 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Exception;
-use App\Models\Role;
-use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
+use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    public function store(Request $request)
+    /**
+     * Display the registration view.
+     */
+    public function create(): View
     {
-        try {
-            $validated = $request->validate(
-                [   'name'      => 'required|string|max:255',
-                    'lastname'  => 'required|string|max:255',
-                    'email'     => 'required|string|email|max:255|unique:users',
-                    'password'  => 'required|string|min:8',
-                    'dni'       => 'required|string|max:20|unique:users',
-                ], [
-                    'name.required'      => 'El nom és obligatori.',
-                    'lastname.required'  => 'El cognom és obligatori.',
-                    'email.required'     => 'L\'email és obligatori.',
-                    'email.email'        => 'L\'email no té un format correcte.',
-                    'email.unique'       => 'Aquest email ja està registrat.',
-                    'dni.required'       => 'El DNI és obligatori.',
-                    'dni.unique'         => 'Aquest DNI ja està registrat.',
-                    'password.required'  => 'La contrasenya és obligatòria.',
-                    'password.min'       => 'La contrasenya ha de tenir almenys 8 caràcters.',
-                ]
-            );
+        return view('auth.register');
+    }
 
-            // Creació de l'usuari
-            $user = User::create([
-                'name'               => $validated['name'],
-                'lastname'           => $validated['lastname'],
-                'email'              => $validated['email'],
-                'dni'                => $validated['dni'],
-                'email_verified_at'  => now(),
-                'password'           => Hash::make($validated['password']),
-                'role_id'            => Role::where('name', 'visitant')->value('id'),
-            ]);
-            event(new Registered($user));
+    /**
+     * Handle an incoming registration request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
 
-            $token = $user->createToken('auth_token')->plainTextToken;  // Crea el token en 'personal_acces_tokens'
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-            return response()->json([
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'user' => $user
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'message' => 'S\'ha produït un error al tractar les dades',
-                'error_details' => $e->getMessage(),
-            ], 200);
-        }
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        return redirect(route('dashboard', absolute: false));
     }
 }
-
-
-
-
-
-
-
-
-

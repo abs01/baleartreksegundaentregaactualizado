@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use Exception;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\UserRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Http\Requests\UserRequest;
-use Exception;
-
 class UserController extends Controller
 {
     public function index()
@@ -19,9 +19,9 @@ class UserController extends Controller
                     ->orderBy('role_id')
                     ->orderBy('id')
                     ->get();
+        return view('user.index',['users' => $users]);  // Llamada a la View 'user.index' pasando $users para maquetar el resultado del SQL
 
         // SELECCIÓ DEL FORMAT DE LA RESPOSTA
-        return (UserResource::collection($users))->additional(['meta' => 'Users mostrats correctament']);  // torna una resposta personalitzada
     }
 
 /*
@@ -70,11 +70,26 @@ class UserController extends Controller
     
     public function destroy(User $user)
     {
+        $user_role = Role::where('id', $user->role_id)->value('name');
+
         try {
-            //$user->status = 'n';
-            //$user->save();
-            $user->delete();
-            
+            $user->status = 'n';
+
+            if (in_array($user_role, ["admin", "guia"])) {
+                throw (new Exception('Usuari restringit de tipus ' . $user_role));
+            }
+            // Delete comment images
+            foreach ($user->comments as $comment) {
+                $comment->status = 'n';
+                $comment->save();
+            }
+            //detach permite la desconexión de la tabla meeting_users
+            //https://laravel.com/docs/12.x/eloquent-relationships
+            $user->meetings()->detach();
+
+            $user->save();
+            // $userCRUD->delete();
+
             return (new UserResource($user))->additional(['meta' => 'Usuari eliminat correctament']);
         } catch (Exception $e) {
             // GESTIÓ DE L'ERROR
@@ -86,4 +101,5 @@ class UserController extends Controller
             ], 200);
         }
     }
-}
+    }
+
