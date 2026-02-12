@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trek;
+use App\Models\Municipality;
 use Illuminate\Http\Request;
+use App\Models\InterestingPlace;
 
 class TrekCRUDController extends Controller
 {
@@ -21,9 +23,11 @@ class TrekCRUDController extends Controller
      */
     public function create()
     {
-        return view('treks.create');
-    }
+        $municipalities = Municipality::orderBy('name')->get();
+        $interestingPlaces = InterestingPlace::with('treks.municipality')->orderBy('name')->get();
 
+        return view('treks.create', compact('municipalities', 'interestingPlaces'));
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -31,23 +35,35 @@ class TrekCRUDController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'duration' => 'required|integer|min:1',
-            'difficulty' => 'required|in:easy,medium,hard',
+            'municipality_id' => 'required|exists:municipalities,id',
+            'interesting_places' => 'nullable|array',
+            'interesting_places.*' => 'exists:interesting_places,id',
         ]);
 
-        Trek::create($validated);
+        $trek = Trek::create([
+            'regNumber' => "T" . (Trek::max('id') + 1),
+            'name' => $validated['name'],
+            'municipality_id' => $validated['municipality_id'],
+        ]);
 
-        // return redirect()->route('trekCRUD.index')->with('success', 'Trek created successfully');
-        return redirect()->route('trek.index')->with('success', 'Trek created successfully');}
+        // Attach interesting places if any were selected
+        if (!empty($validated['interesting_places'])) {
+            $syncData = [];
+            foreach ($validated['interesting_places'] as $index => $placeId) {
+                $syncData[$placeId] = ['order' => $index + 1];
+            }
+            $trek->interestingPlaces()->attach($syncData);
+        }
+
+        return redirect()->route('trekCRUD.index')->with('success', 'Trek created successfully');
+    }
 
     /**
      * Display the specified resource.
      */
-
-     public function show(Trek $trek)
-    {        
-
+    public function show(string $id)
+    {
+        $trek = Trek::with('municipality')->findOrFail($id);
         return view('treks.show', compact('trek'));
     }
 
@@ -56,8 +72,11 @@ class TrekCRUDController extends Controller
      */
     public function edit(string $id)
     {
-        $trek = Trek::findOrFail($id);
-        return view('treks.edit', compact('trek'));
+        $trek = Trek::with('interestingPlaces')->findOrFail($id);
+        $municipalities = Municipality::orderBy('name')->get();
+        $interestingPlaces = InterestingPlace::with('treks.municipality')->orderBy('name')->get();
+
+        return view('treks.edit', compact('trek', 'municipalities', 'interestingPlaces'));
     }
 
     /**
@@ -65,7 +84,33 @@ class TrekCRUDController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $trek = Trek::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'municipality_id' => 'required|exists:municipalities,id',
+            'interesting_places' => 'nullable|array',
+            'interesting_places.*' => 'exists:interesting_places,id',
+        ]);
+
+        $trek->update([
+            'name' => $validated['name'],
+            'municipality_id' => $validated['municipality_id'],
+        ]);
+
+        // Sync interesting places with order
+        if (isset($validated['interesting_places'])) {
+            $syncData = [];
+            foreach ($validated['interesting_places'] as $index => $placeId) {
+                $syncData[$placeId] = ['order' => $index + 1];
+            }
+            $trek->interestingPlaces()->sync($syncData);
+        } else {
+            // If no places selected, detach all
+            $trek->interestingPlaces()->detach();
+        }
+
+        return redirect()->route('trekCRUD.index')->with('success', 'Trek updated successfully');
     }
 
     /**
@@ -73,6 +118,8 @@ class TrekCRUDController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $trek = Trek::findOrFail($id);
+        $trek->delete();
+        return redirect()->route('trekCRUD.index')->with('success', 'Trek deleted successfully');
     }
 }

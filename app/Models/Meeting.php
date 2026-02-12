@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 use App\Models\Comment;
+use App\Models\Trek;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class Meeting extends Model
 {
@@ -16,6 +17,12 @@ class Meeting extends Model
       'appDateIni',
       'appDateEnd',
     ];
+
+    public function trek()
+    {
+        return $this->belongsTo(Trek::class);
+    }
+
 
     public function comments()
     {

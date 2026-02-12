@@ -1284,6 +1284,7 @@ namespace App\Models {
      * @property int $trek_id
      * @property int $user_id
      * @property int $id
+     * @property-read \App\Models\Trek $trek
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Comment> $comments
      * @property-read int|null $comments_count
      * @property-read \App\Models\User $user
@@ -2878,13 +2879,13 @@ namespace App\Models {
      *
      * @property \Illuminate\Support\Carbon|null $updated_at
      * @property \Illuminate\Support\Carbon|null $created_at
-     * @property int $role_id
+     * @property int|null $role_id
      * @property string|null $remember_token
      * @property mixed $status
      * @property string $password
      * @property string|null $phone
      * @property \Illuminate\Support\Carbon|null $email_verified_at
-     * @property string $dni
+     * @property string|null $dni
      * @property int $id
      * @property-read mixed $name
      * @property-read mixed $lastname

@@ -8,6 +8,12 @@ use App\Models\Trek;
 
 class InterestingPlace extends Model
 {
+
+    protected $fillable = [
+        'name',
+        'place_type_id',
+
+    ];
     public function placeType()
     {
         return $this->belongsTo(PlaceType::class);

@@ -21,15 +21,15 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name',100);
-            $table->string('lastname',100);
-            $table->string('dni',20)->unique();
+            $table->string('lastname',100)->nullable();
+            $table->string('dni',20)->unique()->nullable();
             $table->string('email',100)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone',20)->nullable();
             $table->string('password');
             $table->enum('status', ['y', 'n'])->default('y');
             $table->rememberToken();
-            $table->foreignId('role_id')->constrained()->onUpdate('restrict')->onDelete('restrict');
+            $table->foreignId('role_id')->nullable()->constrained()->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
         });
 

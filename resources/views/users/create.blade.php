@@ -24,6 +24,21 @@
             <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                    id="name" type="text" name="name" value="{{ old('name') }}" required>
         </div>
+     <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="lastname">
+                Last Name
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                   id="lastname" type="text" name="lastname" value="{{ old('lastname') }}">
+
+        </div>
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="dni">
+                DNI
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                   id="dni" type="text" name="dni" value="{{ old('dni') }}" required>
+        </div>
 
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
@@ -33,6 +48,24 @@
                    id="email" type="email" name="email" value="{{ old('email') }}" required>
         </div>
 
+
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="role_id">
+                Role
+            </label>
+            <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                    id="role_id" name="role_id" required>
+                <option value="">Select a role</option>
+                @foreach($roles as $role)
+                    <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                        {{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+   
+        
         <div class="mb-4">
             <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
                 Password
