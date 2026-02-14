@@ -31,7 +31,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('meetings', MeetingControllerCRUD::class);
         
         // Comments resource routes
-        Route::resource('comments', CommentControllerCRUD::class);
+        Route::resource('/comments', CommentControllerCRUD::class);
         
         // Custom routes for comment images (must be AFTER the resource route)
         Route::post('/comments/{comment}/image', [CommentControllerCRUD::class, 'image'])

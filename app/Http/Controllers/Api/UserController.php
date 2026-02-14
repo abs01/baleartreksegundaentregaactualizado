@@ -9,8 +9,13 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+
 class UserController extends Controller
 {
+    /**
+     * Listar todos los usuarios (solo admin)
+     * GET /api/user
+     */
     public function index()
     {
         // SELECCIÓ DE LES DADES
@@ -19,26 +24,14 @@ class UserController extends Controller
                     ->orderBy('role_id')
                     ->orderBy('id')
                     ->get();
-        return view('user.index',['users' => $users]);  // Llamada a la View 'user.index' pasando $users para maquetar el resultado del SQL
-
-        // SELECCIÓ DEL FORMAT DE LA RESPOSTA
+        
+        return UserResource::collection($users)->additional(['meta' => 'Usuaris mostrats correctament']);
     }
 
-/*
-    public function show($email)
-    {
-        $user = User::where('email','like', "%".$email ."%")->firstOrFail()
-                        ->load(['meeting',
-                                'meetings',
-                                'comments',
-                                'comments.images']);
-
-            // SELECCIÓ DEL FORMAT DE LA RESPOSTA
-            return (new UserResource($user))->additional(['meta' => 'Usuari mostrat correctament']); // torna una resposta personalitzada
- 
-    }
-*/
-    
+    /**
+     * Mostrar un usuario específico
+     * GET /api/user/{user}
+     */
     public function show(User $user)
     {   
         // Verificar que l'usuari estigui actiu
@@ -48,58 +41,59 @@ class UserController extends Controller
                          'meetings',
                          'comments',
                          'comments.images']);
-
+            
             // SELECCIÓ DEL FORMAT DE LA RESPOSTA
-            return (new UserResource($user))->additional(['meta' => 'Usuari mostrat correctament']); // torna una resposta personalitzada
+            return (new UserResource($user))->additional(['meta' => 'Usuari mostrat correctament']);
         } else {
-            // abort(404, 'Usuari no disponible');
             return response()->json(['message' => 'Usuari no disponible'], 404);
         }
     }
  
+    /**
+     * Actualizar un usuario
+     * PUT/PATCH /api/user/{user}
+     */
     public function update(UserRequest $request, User $user)
     {
         if ($user->status !== 'y') {
-            // abort(404, 'Usuari no disponible');
             return response()->json(['message' => 'Usuari no disponible'], 404);
         }
-
+        
         $user->update($request->all());
         return (new UserResource($user))->additional(['meta' => 'Usuari modificat correctament']);
     }
     
+    /**
+     * Eliminar (desactivar) un usuario
+     * DELETE /api/user/{user}
+     */
     public function destroy(User $user)
     {
         $user_role = Role::where('id', $user->role_id)->value('name');
-
+        
         try {
             $user->status = 'n';
-
+            
             if (in_array($user_role, ["admin", "guia"])) {
                 throw (new Exception('Usuari restringit de tipus ' . $user_role));
             }
+            
             // Delete comment images
             foreach ($user->comments as $comment) {
                 $comment->status = 'n';
                 $comment->save();
             }
-            //detach permite la desconexión de la tabla meeting_users
-            //https://laravel.com/docs/12.x/eloquent-relationships
+            
+            // Detach permite la desconexión de la tabla meeting_users
             $user->meetings()->detach();
-
             $user->save();
-            // $userCRUD->delete();
-
+            
             return (new UserResource($user))->additional(['meta' => 'Usuari eliminat correctament']);
         } catch (Exception $e) {
-            // GESTIÓ DE L'ERROR
-            // Retorna un JSON amb un missatge d'error i un codi d'estat 500
             return response()->json([
                 'message' => 'S\'ha produït un error al tractar les dades',
-                // El següent és opcional i només s'hauria de mostrar en entorns de desenvolupament (APP_DEBUG=true)
                 'error_details' => $e->getMessage(),
-            ], 200);
+            ], 400);  // ⬅️ Cambiado de 200 a 400 (error de cliente)
         }
     }
-    }
-
+}

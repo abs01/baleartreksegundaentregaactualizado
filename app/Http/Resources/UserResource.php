@@ -20,7 +20,7 @@ class UserResource extends JsonResource
             'dni' => $this->dni,
             'email' => $this->email,
             'phone' => $this->phone,
-            'role' => $this->role->name,
+            'rol' => new RoleResource($this->whenLoaded('role')),
             'guia' => new MeetingResource($this->whenLoaded('meeting')),
             'meetings' => MeetingResource::collection($this->whenLoaded('meetings')),  // 1:N -> cal tornar una col: collection[comments()]
             'comments' => CommentResource::collection($this->whenLoaded('comments')),   // 1:N -> cal tornar una col: collection[comments()]
