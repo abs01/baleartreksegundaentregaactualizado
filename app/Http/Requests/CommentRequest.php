@@ -21,9 +21,12 @@ class CommentRequest extends FormRequest
      */
     public function rules(): array
     {
+
         return [
-        'score' => 'required|integer|min:0|max:5', 
-        'meeting_id' => 'required|exists:meetings,id',
+            'comment' => 'required|string|max:255',
+            'user_id' => 'required|exists:users,id',
+            'meeting_id' => 'required|exists:meetings,id',
+
         ];
     }
 }

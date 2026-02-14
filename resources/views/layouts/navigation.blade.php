@@ -59,6 +59,10 @@
                     <x-nav-link :href="route('comments.index')" :active="request()->routeIs('comments.index')">
                         {{ __('Listado de comentarios') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('comments.create')" :active="request()->routeIs('comments.create')"> 
+                        {{ __('Crear comentario') }} 
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -170,6 +174,8 @@
             <x-responsive-nav-link :href="route('comments.create')" :active="request()->routeIs('comments.create')">
                 {{ __('Crear comentario') }}
             </x-responsive-nav-link>
+
+            
 
         </div>
 

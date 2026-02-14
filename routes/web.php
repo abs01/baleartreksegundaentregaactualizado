@@ -1,10 +1,9 @@
 <?php
 
-use App\Http\Controllers\CommentCRUDController;
+use App\Http\Controllers\CommentControllerCRUD;
 use App\Http\Controllers\MeetingControllerCRUD;
 use App\Http\Controllers\MunicipisControllerCRUD;
 use App\Http\Controllers\PlacesOfInterestCRUDController;
-
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TrekCRUDController;
 use App\Http\Controllers\UserCRUDController;
@@ -25,20 +24,21 @@ Route::middleware('auth')->group(function () {
    
     // Rutes protegides per rol admin
     Route::middleware('CHECK-ROLEADMIN')->group(function () {
-
-    Route::resource('userCRUD', UserCRUDController::class);
-    // Trek CRUD routes
-    Route::resource('trekCRUD', TrekCRUDController::class);
-
-    Route::resource('municipalities', MunicipisControllerCRUD::class);
-    // Places CRUD routes
-    Route::resource('places', PlacesOfInterestCRUDController::class);
-
-    Route::resource('meetings', MeetingControllerCRUD::class);
-
-    Route::resource('comments', CommentCRUDController::class);
-
-        Route::delete('/commentCRUD/destroy/{image}', [CommentCRUDController::class, 'destroyImage'])->name('image.destroy');
-});});
+        Route::resource('userCRUD', UserCRUDController::class);
+        Route::resource('trekCRUD', TrekCRUDController::class);
+        Route::resource('municipalities', MunicipisControllerCRUD::class);
+        Route::resource('places', PlacesOfInterestCRUDController::class);
+        Route::resource('meetings', MeetingControllerCRUD::class);
+        
+        // Comments resource routes
+        Route::resource('comments', CommentControllerCRUD::class);
+        
+        // Custom routes for comment images (must be AFTER the resource route)
+        Route::post('/comments/{comment}/image', [CommentControllerCRUD::class, 'image'])
+            ->name('comments.image');
+        Route::delete('/comments/image/{image}', [CommentControllerCRUD::class, 'destroyImage'])
+            ->name('comments.image.destroy');
+    });
+});
 
 require __DIR__.'/auth.php';

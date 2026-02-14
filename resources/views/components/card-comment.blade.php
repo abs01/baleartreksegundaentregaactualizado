@@ -33,12 +33,12 @@
         
         <!-- Botones de acciones -->
         <div class="flex gap-2">
-            <a href="{{ route('comments.show', ['comment' => $comment->id]) }}" 
+            <a href="{{ route('comments.show', $comment) }}" 
                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                 Show
             </a>
             
-            <form action="{{ route('comments.destroy', ['comment' => $comment->id]) }}" 
+            <form action="{{ route('comments.destroy', $comment) }}" 
                   method="POST" 
                   class="inline"
                   onsubmit="return confirm('¿Estás seguro de que quieres eliminar este comentario?');">
